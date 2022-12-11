@@ -94,7 +94,7 @@ class Solver:
 
 if __name__ == '__main__':
     if len(argv) != 1 and len(argv) != 3 or len(argv) == 3 and not (argv[1] == '-u' or argv[1] == '--update'):
-        raise Exception('Provide no arguments and start solver. Or, use "[-u][--update] filepath" to extend the corpus.')
+        raise Exception('Provide no arguments and start solver. Or, use "[-u <path>][--update <path>]" to extend the corpus.')
     elif len(argv) != 1:
         print('Update the corpus...')
         extend_corpus(argv[2])
