@@ -25,7 +25,7 @@ Enter the folder where `main.py` is located, and
 
     ```python main.py [-u <path>][--update <path>]```
 
-(Tip: Infrequently used words may lead to bad performance.)
+Tip: Infrequently used words may lead to bad performance.
     
 
 ### Interactions
