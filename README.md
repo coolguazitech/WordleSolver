@@ -2,7 +2,7 @@
 ### Brief
 I create a solver for pop game WORDLE. With this program, you can:
 1. Just give it a hint each round when it guesses a word, and you'll be able to solve puzzles quickly.
-1. Extend the corpus from your word list file if needed.
+1. Extend the corpus from your word list file if needed. (Tip: Infrequently used words may lead to bad performance.)
 
 ### Usage
 Enter the folder where `main.py` is located, and
