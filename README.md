@@ -28,7 +28,7 @@ Enter the folder where `main.py` is located, and
 Tip: Infrequently used words may lead to bad performance.
     
 
-### Interactions
+### Interaction
 First and foremost, you can decide whether to use AI features or not. If yes, the solver will use it to guess the word. In each round, the solver will first guess a word. At this time, you have to give it a **hint** according to the result (the default is green, yellow and gray spots), and proceed in this way until the end of the game. E.g: If the result shows like this, 
 
 ![](https://github.com/coolguazitech/WordleSolver/blob/main/assets/wordle_eg.jpg)
