@@ -1,20 +1,24 @@
 from sys import argv
 from collections import Counter
 import os
-from sklearn.linear_model import LinearRegression
-from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import Pipeline
+from sklearn.naive_bayes import MultinomialNB
 import numpy as np
 from numpy.random import normal
+from sklearn.ensemble import AdaBoostClassifier
 
-VERSION = '1.0.0'
+VERSION = '1.1'
 
 N_CHANCES = 6
 WORD_LENGTH = 5
-RATING_RANGE = 3
+SCORING_RANGE = 5
 VOWELS = {'a', 'e', 'i', 'o', 'u'}
+SCORERS = ['AdaBoostClassifier(MultinomialNB(), n_estimators=10)']
+CHAR_2_RATE = {'A': 5, 'B': 2, 'X': 1}
+STOP_WORDS_PATH = 'stop_words.txt'
+CORPUS_PATH = 'corpus.txt'
+GUESS_RESULTS_PATH = os.path.join('ml', f'guess_results_{WORD_LENGTH}l_{SCORING_RANGE}r.data')
 
-def extend_corpus(src_path, dst_path='corpus.txt'):
+def extend_corpus(src_path, dst_path=CORPUS_PATH):
     """Append words to corpus from source file."""
     src_f = open(src_path, 'r')
     dst_f = open(dst_path, 'a')
@@ -25,29 +29,33 @@ def extend_corpus(src_path, dst_path='corpus.txt'):
     src_f.close()
     dst_f.close()
 
-def add_stop_word(word, dst_path='stop_words.txt'):
+def add_stop_word(word, dst_path=STOP_WORDS_PATH):
     """Add a stop word."""
     with open(dst_path, 'a') as f:
         f.write(word + '\n')
 
-def insert_results(results, dst_path=os.path.join('ml', 'guess_results_5.data')):
+def vectorize_word(word):
+    """Vectorize an iterable of word."""
+    return list(map(ord, word))
+
+def insert_results(results_with_scores, dst_path=GUESS_RESULTS_PATH):
     """Insert game results into archive for online learning.
 
     Parameters
     ----------
-    results : 2D array, where nRow, nCol = (USED CHANCES, WORD_LENGTH * 2)
-      Each row would be [g1, g2, ..., gk, r1, r2, ..., rk] where gi denotes the guessed letter;
-      ri denotes the result letter, and k denotes WORD_LENGTH.
+    results_with_scores : 2D array, where nRow, nCol = (USED CHANCES, WORD_LENGTH + 1)
+      Each row would be [n1, n2, ..., nk, score] where ni denotes the ASCII code of gi,
+      k denotes WORD_LENGTH, and the integer score demonstrates how good this guess is. 
+      The score is in [0, RATING_RANGE].
 
     """
     m, n = len(results), len(results[0]) // 2
-    results_with_scores = _score(results)
     dst_f = open(dst_path, 'a')
     for r in results_with_scores:
         dst_f.write(','.join(map(str, r)) + '\n')
     dst_f.close()
 
-def _score(results):
+def score(results):
     """Define scoring criteria for guess results.
 
     Parameters
@@ -60,17 +68,21 @@ def _score(results):
     -------
     results_with_scores : 2D array, where nRow, nCol = (USED CHANCES, WORD_LENGTH + 1)
       Each row would be [n1, n2, ..., nk, score] where ni denotes the ASCII code of gi,
-      k denotes WORD_LENGTH, and the score demonstrates how good this guess is.
+      k denotes WORD_LENGTH, and the integer score demonstrates how good this guess is. 
+      The score is in [0, RATING_RANGE].
 
     """
-    m, n = len(results), len(results[0]) // 2
-    results_with_scores = [list(map(ord, r[:n])) + [0] for r in results]
+    _, n = len(results), len(results[0]) // 2
+    results_with_scores = [vectorize_word(r[:n]) + [0] for r in results]
 
-    # Current criterion:
-    char_2_point = {'A': 2, 'B': 1, 'X': 0}
+    # Current criterion (gini + rating):
+    max_rate = max(CHAR_2_RATE.values()) * WORD_LENGTH
     for i, r in enumerate(results):
         cnt = Counter(r[n:])
-        results_with_scores[i][-1] = (N_CHANCES - i) * sum(char_2_point[c] * cnt[c] for c in cnt)
+        impurity = 1 - sum((cnt[c] / WORD_LENGTH) ** 2 for c in cnt)
+        spots_rate = sum(CHAR_2_RATE[c] * cnt[c] for c in cnt) / max_rate
+        _score = int((0.75 * (1 - impurity) + 0.25 * spots_rate) * SCORING_RANGE)
+        results_with_scores[i][-1] = _score
 
     return results_with_scores
 
@@ -79,6 +91,12 @@ class Wordlist:
         self._size = 0
         self._words = []
         self.enable_AI = enable_AI
+        self._scorers = []
+        self._load_words()
+        if enable_AI:
+            self._get_scorers()
+            self._train_scorers()
+        self._rearrange_words()
 
     @property
     def size(self):
@@ -88,13 +106,11 @@ class Wordlist:
     def words(self):
         return self._words
     
-    def rearrange_words(self):
+    def _rearrange_words(self):
         """Sort by the sorting criteria."""
-        if self.enable_AI:
-            self.estimator = self._get_learned_regressor()
         self._words.sort(key=self._sort_criteria)
         
-    def load_words(self, src_path='corpus.txt', stop_words_path='stop_words.txt'):
+    def _load_words(self, src_path=CORPUS_PATH, stop_words_path=STOP_WORDS_PATH):
         """Load and count the valid words from corpus except for stop words."""
         print('Load words from corpus...')
         words, stop_words = set(), set()
@@ -128,43 +144,42 @@ class Wordlist:
           a number randomized with Gaussian noise 
 
         """
-        # 1 to RATING_RANGE points for each criterion
+        # 0 to RATING_RANGE points for each criterion
         priority = 0
 
         # Criterion 1: the number of vowels in the word
-        priority += int(sum(c in VOWELS for c in word) * (RATING_RANGE - 1) / WORD_LENGTH) + 1
+        priority += int(sum(c in VOWELS for c in word) * SCORING_RANGE / WORD_LENGTH) 
 
         # Criterion 2: the diversity of letters in the word
-        priority += int((len(set(word)) - 1) * (RATING_RANGE - 1) / (WORD_LENGTH - 1)) + 1
+        priority += int((len(set(word)) - 1) * SCORING_RANGE / (WORD_LENGTH - 1)) 
 
-        # Criterion 3: the AI scorer
-        if self.enable_AI:
-            maximum = 2 * N_CHANCES * WORD_LENGTH
-            _word = list(map(ord, word))
-            priority += int(self.estimator.predict([_word])[0] * (RATING_RANGE - 1) / maximum) + 1
+        # Criterion 3: the AI scorers
+        _word = vectorize_word(word)
+        for scorer in self._scorers:
+            priority += scorer.predict([_word])[0] 
 
-        return priority * normal(loc=1.0, scale=0.1)
+        return priority * normal(loc=1.0, scale=0.2)
 
-    def _get_learned_regressor(self, src_path=os.path.join('ml', 'guess_results_5.data')):
-        """Load the data and use it to train a regression model, then return the model."""
+    def _get_scorers(self):
+        """Get instantiated non-trained scorers."""
+        self._scorers = list(map(eval, SCORERS))
+
+    def _train_scorers(self, src_path=GUESS_RESULTS_PATH):
+        """Load dataset and use it to train scorers."""
         # load data
         src_f = open(src_path, 'r')
-        pipe_lr = Pipeline([('ss', StandardScaler()), ('lr', LinearRegression())])
         data = [r[:-1].split(',') for r in src_f.readlines()]
+        data = np.array(data, dtype=np.int)
+        X, y = data[:, :-1], data[:, -1]
         src_f.close()
 
-        # train model
-        data = np.array(data, dtype=np.float)
-        X, y = data[:, :-1], data[:, -1]
-        pipe_lr.fit(X, y)
-
-        return pipe_lr
+        # train estimators
+        for scorer in self._scorers:
+            scorer.fit(X, y)
 
 class Solver:
     def __init__(self, enable_AI=False):
         self.wordlist = Wordlist(enable_AI)
-        self.wordlist.load_words()
-        self.wordlist.rearrange_words()
         self.size = self.wordlist.size
         self.words = self.wordlist.words
         self.enable_AI = enable_AI
@@ -206,7 +221,10 @@ class Solver:
         self.words = remained_words
 
 if __name__ == '__main__':
-    # initialize corpus
+    # print version
+    print(f'Version {VERSION}')
+
+    # initialization
     if len(argv) != 1 and len(argv) != 3 or len(argv) == 3 and not (argv[1] == '-u' or argv[1] == '--update'):
         raise Exception('Provide no arguments and start solver. Or, use "[-u <path>][--update <path>]" to extend the corpus.')
     elif len(argv) != 1:
@@ -223,6 +241,7 @@ if __name__ == '__main__':
     solver = Solver(enable_AI=enable_AI)
     print('Start!')
 
+    # loop
     results = []
     for _ in range(N_CHANCES):
         while True:
@@ -244,6 +263,9 @@ if __name__ == '__main__':
 
         solver.update_words(guess, inputs)
     else: print('Sorry I can\'t solve it...')
-    insert_results(results)
+
+    # score the results and insert it into archive
+    results_with_scores = score(results)
+    insert_results(results_with_scores)
     print('Thank you for using! We expect your feedback.')
             
