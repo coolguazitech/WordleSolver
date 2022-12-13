@@ -6,7 +6,7 @@ import numpy as np
 from numpy.random import normal
 from sklearn.ensemble import AdaBoostClassifier
 
-VERSION = '1.1'
+VERSION = '1.2'
 
 N_CHANCES = 6
 WORD_LENGTH = 5
