@@ -1,18 +1,18 @@
 from sys import argv
 from collections import Counter
 import os
-from sklearn.linear_model import LinearRegression
-from sklearn.preprocessing import StandardScaler
+from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import Pipeline
 import numpy as np
 from numpy.random import normal
 
-VERSION = '1.0.0'
+VERSION = 'v1.1'
 
 N_CHANCES = 6
 WORD_LENGTH = 5
-RATING_RANGE = 3
+RATING_RANGE = 5
 VOWELS = {'a', 'e', 'i', 'o', 'u'}
+ESTIMATORS = ['MultinomialNB']
 
 def extend_corpus(src_path, dst_path='corpus.txt'):
     """Append words to corpus from source file."""
@@ -87,11 +87,14 @@ class Wordlist:
     @property
     def words(self):
         return self._words
+
+    def _get_estimators(self):
+        pass
     
     def rearrange_words(self):
         """Sort by the sorting criteria."""
         if self.enable_AI:
-            self.estimator = self._get_learned_regressor()
+            self.estimator = self._get_learned_estimator()
         self._words.sort(key=self._sort_criteria)
         
     def load_words(self, src_path='corpus.txt', stop_words_path='stop_words.txt'):
@@ -128,14 +131,14 @@ class Wordlist:
           a number randomized with Gaussian noise 
 
         """
-        # 1 to RATING_RANGE points for each criterion
+        # 0 to RATING_RANGE points for each criterion
         priority = 0
 
         # Criterion 1: the number of vowels in the word
-        priority += int(sum(c in VOWELS for c in word) * (RATING_RANGE - 1) / WORD_LENGTH) + 1
+        priority += int(sum(c in VOWELS for c in word) * RATING_RANGE / WORD_LENGTH) 
 
         # Criterion 2: the diversity of letters in the word
-        priority += int((len(set(word)) - 1) * (RATING_RANGE - 1) / (WORD_LENGTH - 1)) + 1
+        priority += int((len(set(word)) - 1) * RATING_RANGE / (WORD_LENGTH - 1)) 
 
         # Criterion 3: the AI scorer
         if self.enable_AI:
@@ -145,16 +148,16 @@ class Wordlist:
 
         return priority * normal(loc=1.0, scale=0.1)
 
-    def _get_learned_regressor(self, src_path=os.path.join('ml', 'guess_results_5.data')):
+    def _get_learned_estimator(self, src_path=os.path.join('ml', 'guess_results_5.data')):
         """Load the data and use it to train a regression model, then return the model."""
         # load data
         src_f = open(src_path, 'r')
-        pipe_lr = Pipeline([('ss', StandardScaler()), ('lr', LinearRegression())])
+        mnb = MultinomialNB()
         data = [r[:-1].split(',') for r in src_f.readlines()]
+        data = np.array(data, dtype=np.int)
         src_f.close()
 
         # train model
-        data = np.array(data, dtype=np.float)
         X, y = data[:, :-1], data[:, -1]
         pipe_lr.fit(X, y)
 
