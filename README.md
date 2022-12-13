@@ -29,7 +29,7 @@ To run the code correctly, you need to install *scikit-learn* and *numpy* packag
 `pip install numpy`
 
 ## Usage
-Enter the folder where `main.py` is located, and
+Enter the folder where *main.py* is located, and
 
 * run the solver directly with
 
