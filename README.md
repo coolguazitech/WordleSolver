@@ -47,7 +47,7 @@ First and foremost, you can decide whether to use AI features or not. If yes, th
 then the hint you'll give it is 'XBXXA', where 'X' stands for gray, 'A' for green, and 'B' for yellow.
 If the result shows there is no such word, enter one '!'. In the case the chances will not decrement.
 
-## Tips: 
+## Tips
 * When extending the corpus, infrequently used words may lead to bad performance.
 * If the program fails in any way, consider extending the corpus.
 * Be sure to finish the program by entering 'AAAAA' when the words match to train a better AI solver.
