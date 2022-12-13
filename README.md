@@ -1,5 +1,5 @@
 # Wordle Solver AI
-## Version 1.1
+## Version 1.2
 ### revision info
 
 * Consider that the data are clearly not linearly separable, change the AI guess scorer:
@@ -13,6 +13,10 @@
 * Change guess result scoring criteria:
 
 	*occurrence of spot types -> Gini impurity + spot type rating*
+
+* Extend the corpus:
+
+	*5000 words-> 8000 words*
 
 
 ## Brief
@@ -51,3 +55,4 @@ If the result shows there is no such word, enter one '!'. In the case the chance
 * When extending the corpus, infrequently used words may lead to bad performance.
 * If the program fails in any way, consider extending the corpus.
 * Be sure to finish the program by entering 'AAAAA' when the words match to train a better AI solver.
+* Due to a large amount of corpus, the solver may frequently guess words that are not in the target corpus, please try patiently (enter '!').
