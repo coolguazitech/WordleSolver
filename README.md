@@ -33,7 +33,7 @@ To run the code correctly, you need to install *scikit-learn* and *numpy* packag
 `pip install numpy`
 
 ## Usage
-Enter the folder where `main.py` is located, and
+Enter the folder where *main.py* is located, and
 
 * run the solver directly with
 
@@ -56,3 +56,4 @@ If the result shows there is no such word, enter one '!'. In the case the chance
 * If the program fails in any way, consider extending the corpus.
 * Be sure to finish the program by entering 'AAAAA' when the words match to train a better AI solver.
 * Due to a large amount of corpus, the solver may frequently guess words that are not in the target corpus, please try patiently (enter '!').
+
