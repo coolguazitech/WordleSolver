@@ -148,7 +148,6 @@ class Wordlist:
 
         """
         # 0 to RATING_RANGE points for each criterion
-       
         n_criteria = 3
         weights = [0.3, 0.2, 0.5]
         scores = [0] * n_criteria
