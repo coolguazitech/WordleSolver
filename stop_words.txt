@@ -182,3 +182,7 @@ hogue
 ukiah
 picts
 corsi
+duron
+orkut
+cruzi
+drury
