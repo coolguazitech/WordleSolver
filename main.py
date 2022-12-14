@@ -108,10 +108,6 @@ class Wordlist:
     @property
     def words(self):
         return self._words
-    
-    def _rearrange_words(self):
-        """Sort by the sorting criteria."""
-        self._words.sort(key=self._sort_criteria)
         
     def _load_words(self, src_path=CORPUS_PATH, stop_words_path=STOP_WORDS_PATH):
         """Load and count the valid words from corpus except for stop words."""
@@ -138,6 +134,10 @@ class Wordlist:
         stop_words_f.close()
         self._size, self._words = len(words), list(words)
 
+    def _rearrange_words(self):
+        """Sort by the sorting criteria."""
+        self._words.sort(key=self._sort_criteria)
+        
     def _sort_criteria(self, word):
         """Determine how words are sorted.
 
@@ -148,20 +148,23 @@ class Wordlist:
 
         """
         # 0 to RATING_RANGE points for each criterion
-        priority = 0
-
+       
+        n_criteria = 3
+        weights = [0.3, 0.2, 0.5]
+        scores = [0] * n_criteria
+        
         # Criterion 1: the number of vowels in the word
-        priority += int(sum(c in VOWELS for c in word) * SCORING_RANGE / WORD_LENGTH) 
+        scores[0] = int(sum(c in VOWELS for c in word) * SCORING_RANGE / WORD_LENGTH) 
 
         # Criterion 2: the diversity of letters in the word
-        priority += int((len(set(word)) - 1) * SCORING_RANGE / (WORD_LENGTH - 1)) 
+        scores[1] = int((len(set(word)) - 1) * SCORING_RANGE / (WORD_LENGTH - 1)) 
 
         # Criterion 3: the AI scorers
         _word = vectorize_word(word)
-        for scorer in self._scorers:
-            priority += scorer.predict([_word])[0] 
-
-        return priority * normal(loc=1.0, scale=0.2)
+        scores[2] = np.mean(scorer.predict([_word])[0] for scorer in self._scorers) 
+        
+        priority = np.dot(weights, scores)
+        return priority * normal(loc=1.0, scale=0.25)
 
     def _get_scorers(self):
         """Get instantiated non-trained scorers."""
