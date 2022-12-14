@@ -186,3 +186,10 @@ duron
 orkut
 cruzi
 drury
+gouda
+jenks
+eisen
+nokia
+mobic
+uklug
+tclug
