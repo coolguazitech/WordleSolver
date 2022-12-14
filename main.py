@@ -166,6 +166,7 @@ class Wordlist:
 
     def _train_scorers(self, src_path=GUESS_RESULTS_PATH):
         """Load dataset and use it to train scorers."""
+        print('Get intelligence...')
         # load data
         src_f = open(src_path, 'r')
         data = [r[:-1].split(',') for r in src_f.readlines()]
