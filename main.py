@@ -161,7 +161,7 @@ class Wordlist:
 
         # Criterion 3: the AI scorers
         _word = vectorize_word(word)
-        scores[2] = np.mean(scorer.predict([_word])[0] for scorer in self._scorers) 
+        scores[2] = np.mean([scorer.predict([_word])[0] for scorer in self._scorers]) 
         
         priority = np.dot(weights, scores)
         return priority * normal(loc=1.0, scale=0.25)
