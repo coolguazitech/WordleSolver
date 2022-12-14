@@ -154,3 +154,5 @@ fabio
 aesop
 lucie
 youve
+torre
+corel
