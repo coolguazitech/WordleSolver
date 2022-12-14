@@ -2,21 +2,23 @@
 ## Version 1.2
 ### revision info
 
-* Consider that the data are clearly not linearly separable, change the AI guess scorer:
+* v1.1
+	* Consider that the data are clearly not linearly separable, change the AI guess scorer:
 
-	*Linear Regression -> Multinomial Naive Bayes*
+		*Linear Regression -> Multinomial Naive Bayes*
 
-* Add ensembling booster:
+	* Add ensembling booster:
 
-	*\+ AdaBoost classifier*
+		*\+ AdaBoost classifier*
 
-* Change guess result scoring criteria:
+	* Change guess result scoring criteria:
 
-	*occurrence of spot types -> Gini impurity + spot type rating*
+		*occurrence of spot types -> Gini impurity + spot type rating*
 
-* Extend the corpus:
+* current 
+	* Extend the corpus:
 
-	*5000 words-> 8000 words*
+		*5000 words-> 8000 words*
 
 
 ## Brief
