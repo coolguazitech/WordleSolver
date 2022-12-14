@@ -1,24 +1,16 @@
 # Wordle Solver AI
-## Version 1.2
+## Version 1.3
 ### revision info
 
-* v1.1
-	* Consider that the data are clearly not linearly separable, change the AI guess scorer:
-
-		*Linear Regression -> Multinomial Naive Bayes*
-
-	* Add ensembling booster:
-
-		*\+ AdaBoost classifier*
-
-	* Change guess result scoring criteria:
-
-		*occurrence of spot types -> Gini impurity + spot type rating*
-
-* current 
+* v1.2
 	* Extend the corpus:
 
 		*5000 words-> 8000 words*
+
+* current 
+	* Notice that the target distribution may be more complex up to the deep learning level:
+
+		*Multinomial Naive Bayes-> MLPClassifier*
 
 
 ## Brief

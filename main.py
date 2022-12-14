@@ -1,19 +1,23 @@
 from sys import argv
 from collections import Counter
 import os
-from sklearn.naive_bayes import MultinomialNB
 import numpy as np
 from numpy.random import normal
-from sklearn.ensemble import AdaBoostClassifier
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import Pipeline
+from sklearn.neural_network import MLPClassifier
+import warnings
 
-VERSION = '1.2'
+warnings.filterwarnings('ignore')
+
+VERSION = '1.3'
 
 N_CHANCES = 6
 WORD_LENGTH = 5
 SCORING_RANGE = 5
 VOWELS = {'a', 'e', 'i', 'o', 'u'}
-SCORERS = ['AdaBoostClassifier(MultinomialNB(), n_estimators=12)']
-CHAR_2_RATE = {'A': 5, 'B': 2, 'X': 1}
+SCORERS = ['Pipeline([("ss", StandardScaler()),("mlp", MLPClassifier(hidden_layer_sizes=(8,16,32), max_iter=2000, tol=1e-6, learning_rate="adaptive"))])']
+CHAR_2_RATE = {'A': 10, 'B': 5, 'X': 1}
 STOP_WORDS_PATH = 'stop_words.txt'
 CORPUS_PATH = 'corpus.txt'
 GUESS_RESULTS_PATH = os.path.join('ml', f'guess_results_{WORD_LENGTH}l_{SCORING_RANGE}r.data')
@@ -81,7 +85,7 @@ def score(results):
         cnt = Counter(r[n:])
         impurity = 1 - sum((cnt[c] / WORD_LENGTH) ** 2 for c in cnt)
         spots_rate = sum(CHAR_2_RATE[c] * cnt[c] for c in cnt) / max_rate
-        _score = int((0.75 * (1 - impurity) + 0.25 * spots_rate) * SCORING_RANGE)
+        _score = int((0.4 * (1 - impurity) ** 0.5 + 0.6 * spots_rate) * SCORING_RANGE)
         results_with_scores[i][-1] = _score
 
     return results_with_scores
