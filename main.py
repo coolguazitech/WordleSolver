@@ -12,7 +12,7 @@ N_CHANCES = 6
 WORD_LENGTH = 5
 SCORING_RANGE = 5
 VOWELS = {'a', 'e', 'i', 'o', 'u'}
-SCORERS = ['AdaBoostClassifier(MultinomialNB(), n_estimators=10)']
+SCORERS = ['AdaBoostClassifier(MultinomialNB(), n_estimators=12)']
 CHAR_2_RATE = {'A': 5, 'B': 2, 'X': 1}
 STOP_WORDS_PATH = 'stop_words.txt'
 CORPUS_PATH = 'corpus.txt'
@@ -90,12 +90,11 @@ class Wordlist:
     def __init__(self, enable_AI=False):
         self._size = 0
         self._words = []
-        self.enable_AI = enable_AI
         self._scorers = []
-        self._load_words()
         if enable_AI:
             self._get_scorers()
             self._train_scorers()
+        self._load_words()
         self._rearrange_words()
 
     @property
