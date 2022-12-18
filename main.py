@@ -48,9 +48,9 @@ def insert_results(results_with_scores, dst_path=GUESS_RESULTS_PATH):
     Parameters
     ----------
     results_with_scores : 2D array, where nRow, nCol = (USED CHANCES, WORD_LENGTH + 1)
-      Each row would be [n1, n2, ..., nk, score] where ni denotes the ASCII code of gi,
-      k denotes WORD_LENGTH, and the integer score demonstrates how good this guess is. 
-      The score is in [0, RATING_RANGE].
+      Each row would be [n1, n2, ..., nk, score] where ni denotes the ASCII code of gi 
+      defined in the function 'score',k denotes WORD_LENGTH, and the integer score 
+      demonstrates how good this guess is. The score is in [0, RATING_RANGE].
 
     """
     m, n = len(results), len(results[0]) // 2
