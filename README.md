@@ -22,9 +22,7 @@ I create a solver featuring AI for the pop game WORDLE. With this program, you c
 ## Prerequisite
 To run the code correctly, you need to install *scikit-learn* and *numpy* packages using
 
-`pip install -U scikit-learn`
-
-`pip install numpy`
+`pip install -r requirements`
 
 ## Usage
 Enter the folder where *main.py* is located, and
